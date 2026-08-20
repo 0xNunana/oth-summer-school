@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch initial results from our local API
     const fetchResults = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/results');
+            const response = await fetch('/api/results');
             const data = await response.json();
 
             if (!response.ok) {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Check if connected user has voted
             if (connectedAccountId) {
                 try {
-                    const hvRes = await fetch(`http://localhost:3000/api/hasVoted/${connectedAccountId}`);
+                    const hvRes = await fetch(`/api/hasVoted/${connectedAccountId}`);
                     const hvData = await hvRes.json();
                     userHasVoted = hvData.hasVoted === true;
                 } catch (e) {
