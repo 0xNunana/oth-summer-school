@@ -6,10 +6,15 @@
   "main": "deploy.js",
   "scripts": {
     "deploy": "node deploy.js",
-    "call": "node call.js"
+    "call": "node call.js",
+    "compile": "npx solcjs --bin --abi -o build Voting.sol",
+    "start": "node server.js"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.62.0",
-    "dotenv": "^16.4.5"
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "solc": "^0.8.36"
   }
 }

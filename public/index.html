@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hedera Voting Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Voting Results</h1>
+            <p>Live from the Hedera Testnet</p>
+        </header>
+
+        <main>
+            <div id="loading" class="loading">Fetching data from the ledger...</div>
+            <div id="error" class="error hidden"></div>
+            
+            <div id="results" class="hidden">
+                <div class="winner-card">
+                    <h2>Current Winner</h2>
+                    <div id="winner-name" class="winner-text">--</div>
+                </div>
+
+                <div class="topics-grid" id="topics-container">
+                    <!-- Topics will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

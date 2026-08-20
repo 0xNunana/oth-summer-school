@@ -79,43 +79,23 @@ function normalizeHex(hex) {
 /* ------------------------------------------------------------------ */
 
 function parseArgs(argv) {
-  const [, , file, ...rest] = argv;
-  if (!file) {
-    console.error(
-      "Usage: node deploy.js <artifact-or-bin-file> [--gas N] [--memo TEXT] " +
-        "[--arg-string V] [--arg-address 0.0.x|0x..] [--arg-uint256 N] [--arg-bool true|false]"
-    );
-    process.exit(1);
+  // If the user runs `npm run deploy "Topic A,Topic B,Topic C"`, 
+  // npm passes the argument, and it arrives in argv[2].
+  const [, , arg1] = argv;
+  
+  let topicsString = "Pizza,Burgers,Tacos"; // Default topics
+  const file = "./build/Voting_sol_Voting.bin";
+  
+  if (arg1 && !arg1.startsWith("--")) {
+    topicsString = arg1;
   }
-
-  const opts = { file, gas: 200_000, memo: "", constructorArgs: [] };
-
-  for (let i = 0; i < rest.length; i++) {
-    const token = rest[i];
-    switch (token) {
-      case "--gas":
-        opts.gas = Number(rest[++i]);
-        break;
-      case "--memo":
-        opts.memo = rest[++i];
-        break;
-      case "--arg-string":
-        opts.constructorArgs.push(["addString", rest[++i]]);
-        break;
-      case "--arg-address":
-        opts.constructorArgs.push(["addAddress", toEvmAddress(rest[++i])]);
-        break;
-      case "--arg-uint256":
-        opts.constructorArgs.push(["addUint256", rest[++i]]);
-        break;
-      case "--arg-bool":
-        opts.constructorArgs.push(["addBool", rest[++i] === "true"]);
-        break;
-      default:
-        throw new Error(`Unknown argument: ${token}`);
-    }
-  }
-  return opts;
+  
+  return { 
+    file, 
+    gas: 2_000_000, 
+    memo: "", 
+    constructorArgs: [["addStringArray", topicsString.split(",")]]
+  };
 }
 
 /** Convert a Hedera 0.0.x id or a 0x EVM address to a solidity address. */
