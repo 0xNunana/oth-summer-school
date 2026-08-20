@@ -34,7 +34,7 @@ import {
 /* ================================================================== */
 
 // 1. The contract you want to call (e.g. "0.0.1234567").
-const CONTRACT_ID = "0.0.10152656"; // Updated to our deployed Voting contract
+const CONTRACT_ID = process.env.VITE_CONTRACT_ID; // Updated to our deployed Voting contract
 
 // 2. "query"   -> read-only view/pure function (free, no state change)
 //    "execute" -> state-changing function (costs gas, produces a receipt status)

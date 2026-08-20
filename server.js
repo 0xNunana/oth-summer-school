@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 import {
-  Client,
-  AccountId,
-  PrivateKey,
-  ContractId,
-  ContractCallQuery,
-  ContractFunctionParameters,
-  Hbar
+    Client,
+    AccountId,
+    PrivateKey,
+    ContractId,
+    ContractCallQuery,
+    ContractFunctionParameters,
+    Hbar
 } from '@hashgraph/sdk';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,24 +22,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 // Set your contract ID here after deploying
-const CONTRACT_ID = process.env.CONTRACT_ID || "0.0.10152656"; 
+const CONTRACT_ID = process.env.VITE_CONTRACT_ID
 
 function makeTestnetClient() {
-  const operatorId = process.env.HEDERA_OPERATOR_ID;
-  const operatorKeyRaw = process.env.HEDERA_OPERATOR_KEY;
-  if (!operatorId || !operatorKeyRaw) {
-    throw new Error("Please set HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY in .env");
-  }
-  let operatorKey;
-  try {
-    operatorKey = PrivateKey.fromStringDer(operatorKeyRaw);
-  } catch {
-    operatorKey = PrivateKey.fromStringECDSA(operatorKeyRaw);
-  }
-  const client = Client.forTestnet();
-  client.setOperator(AccountId.fromString(operatorId), operatorKey);
-  client.setDefaultMaxTransactionFee(new Hbar(20));
-  return client;
+    const operatorId = process.env.HEDERA_OPERATOR_ID;
+    const operatorKeyRaw = process.env.HEDERA_OPERATOR_KEY;
+    if (!operatorId || !operatorKeyRaw) {
+        throw new Error("Please set HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY in .env");
+    }
+    let operatorKey;
+    try {
+        operatorKey = PrivateKey.fromStringDer(operatorKeyRaw);
+    } catch {
+        operatorKey = PrivateKey.fromStringECDSA(operatorKeyRaw);
+    }
+    const client = Client.forTestnet();
+    client.setOperator(AccountId.fromString(operatorId), operatorKey);
+    client.setDefaultMaxTransactionFee(new Hbar(20));
+    return client;
 }
 
 const client = makeTestnetClient();
@@ -48,10 +48,10 @@ app.get('/api/results', async (req, res) => {
     if (!CONTRACT_ID) {
         return res.status(400).json({ error: "CONTRACT_ID not set in environment or server" });
     }
-    
+
     try {
         const contractId = ContractId.fromString(CONTRACT_ID);
-        
+
         // 1. Get Topic Count
         const countQuery = new ContractCallQuery()
             .setContractId(contractId)
@@ -69,7 +69,7 @@ app.get('/api/results', async (req, res) => {
                 .setFunction("getTopicName", new ContractFunctionParameters().addUint256(i));
             const nameResult = await nameQuery.execute(client);
             const name = nameResult.getString(0);
-            
+
             // Get Votes
             const voteQuery = new ContractCallQuery()
                 .setContractId(contractId)
@@ -77,21 +77,47 @@ app.get('/api/results', async (req, res) => {
                 .setFunction("getTopicVotes", new ContractFunctionParameters().addUint256(i));
             const voteResult = await voteQuery.execute(client);
             const votes = voteResult.getUint256(0).toNumber();
-            
+
             topics.push({ id: i, name, votes });
         }
-        
-        // Get Winning Topic
-        const winQuery = new ContractCallQuery()
-            .setContractId(contractId)
-            .setGas(100000)
-            .setFunction("getWinningTopic");
-        const winResult = await winQuery.execute(client);
-        const winner = winResult.getString(0);
+
+        // Calculate the winner(s) dynamically to handle ties properly
+        let winner = "No votes yet";
+        const maxVotes = Math.max(...topics.map(t => t.votes));
+
+        if (maxVotes > 0) {
+            const winners = topics.filter(t => t.votes === maxVotes).map(t => t.name);
+            if (winners.length > 1) {
+                winner = "Tie: " + winners.join(" & ");
+            } else {
+                winner = winners[0];
+            }
+        }
 
         res.json({ topics, winner });
     } catch (err) {
         console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/hasVoted/:accountId', async (req, res) => {
+    try {
+        const contractId = ContractId.fromString(CONTRACT_ID);
+        const accountId = req.params.accountId;
+        const solAddress = AccountId.fromString(accountId).toSolidityAddress();
+
+        const query = new ContractCallQuery()
+            .setContractId(contractId)
+            .setGas(100000)
+            .setFunction("hasVoted", new ContractFunctionParameters().addAddress(solAddress));
+
+        const result = await query.execute(client);
+        const hasVoted = result.getBool(0);
+
+        res.json({ hasVoted });
+    } catch (err) {
+        console.error("hasVoted error:", err);
         res.status(500).json({ error: err.message });
     }
 });
