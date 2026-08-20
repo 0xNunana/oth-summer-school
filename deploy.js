@@ -146,10 +146,6 @@ function makeTestnetClient() {
   // Cap accidental fee spend; adjust as needed.
   client.setDefaultMaxTransactionFee(new Hbar(20));
   
-  // Prevent the SDK from automatically retrying transactions if a node is slow.
-  // This prevents the DUPLICATE_TRANSACTION error from occurring during ContractCreateFlow.
-  client.setMaxAttempts(1);
-  
   return client;
 }
 
