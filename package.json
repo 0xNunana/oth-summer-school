@@ -9,6 +9,7 @@
     "call": "node call.js",
     "compile": "npx solcjs --bin --abi -o build Voting.sol",
     "dev": "concurrently \"node server.js\" \"vite --port 5173\"",
+    "build": "vite build",
     "start": "node server.js"
   },
   "dependencies": {

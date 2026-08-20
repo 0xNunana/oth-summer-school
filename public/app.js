@@ -1,5 +1,5 @@
 import { HashConnect } from "hashconnect";
-import { LedgerId, ContractExecuteTransaction, ContractId, ContractFunctionParameters, AccountId, TransactionId } from "@hashgraph/sdk";
+import { Client, LedgerId, ContractExecuteTransaction, ContractId, ContractFunctionParameters, AccountId, TransactionId } from "@hashgraph/sdk";
 
 // Contract ID from our deployment
 const CONTRACT_ID = import.meta.env.VITE_CONTRACT_ID; 
@@ -164,8 +164,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .setGas(150000)
                 .setFunction("vote", new ContractFunctionParameters().addUint256(Number(topicIndex)))
                 .setTransactionId(TransactionId.generate(connectedAccountId));
-            
-            console.log("Forcing Transaction ID payer to:", tx.transactionId.accountId.toString());
+
+            const client = Client.forTestnet();
+            tx.freezeWith(client);
 
             // Execute the transaction directly through HashConnect
             const receipt = await hashconnect.sendTransaction(AccountId.fromString(connectedAccountId), tx);

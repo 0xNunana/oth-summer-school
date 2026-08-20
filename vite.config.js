@@ -6,5 +6,10 @@ export default defineConfig({
     nodePolyfills(),
   ],
   root: 'public',
+  publicDir: false,
   envDir: '../',
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  }
 });

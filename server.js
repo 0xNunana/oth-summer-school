@@ -105,7 +105,21 @@ app.get('/api/hasVoted/:accountId', async (req, res) => {
     try {
         const contractId = ContractId.fromString(CONTRACT_ID);
         const accountId = req.params.accountId;
-        const solAddress = AccountId.fromString(accountId).toSolidityAddress();
+        let solAddress = AccountId.fromString(accountId).toSolidityAddress();
+
+        // Hedera smart contracts use the EVM alias for msg.sender if it exists!
+        // We must fetch it from the Mirror Node to check the mapping correctly.
+        try {
+            const mirrorRes = await fetch(`https://testnet.mirrornode.hedera.com/api/v1/accounts/${accountId}`);
+            if (mirrorRes.ok) {
+                const data = await mirrorRes.json();
+                if (data.evm_address) {
+                    solAddress = data.evm_address;
+                }
+            }
+        } catch (e) {
+            console.error("Mirror node fetch error:", e);
+        }
 
         const query = new ContractCallQuery()
             .setContractId(contractId)
@@ -122,7 +136,11 @@ app.get('/api/hasVoted/:accountId', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server listening on http://localhost:${PORT}`);
+    });
+}
+
+export default app;
