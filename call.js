@@ -33,23 +33,30 @@ import {
 /* CONFIG – fill these in                                              */
 /* ================================================================== */
 
+// Config per Voting.sol function (set MODE / METHOD_NAME / RETURN_TYPE / params):
+//   vote(topicIndex)          -> "execute", null,      params.addUint256(0)
+//   addToBlacklist(account)   -> "execute", null,      params.addAddress("0x...")
+//   getTopicCount()           -> "query",   "uint256", no params
+//   getTopic(topicIndex)      -> "query",   "string",  params.addUint256(0)
+//   getVotes(topicIndex)      -> "query",   "uint256", params.addUint256(0)
+
 // 1. The contract you want to call (e.g. "0.0.1234567").
-const CONTRACT_ID = "0.0.xxxxx"; // TODO
+const CONTRACT_ID = "0.0.10150695";
 
 // 2. "query"   -> read-only view/pure function (free, no state change)
 //    "execute" -> state-changing function (costs gas, produces a receipt status)
-const MODE = "query"; // TODO: "query" | "execute"
+const MODE = "query";
 
 // 3. Name of the Solidity function to call.
-const METHOD_NAME = "myMethod"; // TODO
+const METHOD_NAME = "getTopic";
 
 // 4. Gas limit (needed for both a query result and an execute transaction).
-const GAS = 100_000; // TODO: adjust if your method needs more
+const GAS = 100_000;
 
 // 5. The single return type to decode. Set to null if the method returns nothing.
 //    Supported: "string" | "bool" | "address" | "uint256" | "int256" |
 //               "uint64" | "int64" | "uint32" | "int32" | "bytes" | "bytes32"
-const RETURN_TYPE = "string"; // TODO: set to the type your method returns, or null
+const RETURN_TYPE = "string";
 
 /**
  * 6. Build the call arguments here, in the order the Solidity function expects.
@@ -63,9 +70,8 @@ const RETURN_TYPE = "string"; // TODO: set to the type your method returns, or n
  */
 function buildParams() {
   const params = new ContractFunctionParameters();
-  // TODO: add your arguments, e.g.:
-  // params.addString("hello");
-  // params.addUint256(42);
+  params.addUint256(0); // vote for topic 0, get topic name for 0, get votes for topic 0 
+  // params.addAddress("")
   return params;
 }
 
